@@ -16,7 +16,16 @@ const useMapbox = (initalPosition) => {
   //markers reference
   const markers = useRef({})
 
-
+  const addMarker = useCallback((e) => {
+    const { lng, lat } = e.lngLat 
+    const marker = new mapboxgl.Marker()
+    marker.id = uuid() //TODO: check if the marker already has an id
+    marker
+      .setLngLat([lng,lat])
+      .addTo(map.current)
+      .setDraggable(true);
+    markers.current[marker.id] = marker;
+  }, [])
 
   //create the map instance on first load of the hook
   useEffect(() => {
@@ -44,22 +53,14 @@ const useMapbox = (initalPosition) => {
 
   //add markers on click
   useEffect(() => {
-    map.current?.on('click',(e) => {
-      const { lng, lat } = e.lngLat 
-      const marker = new mapboxgl.Marker()
-      marker.id = uuid() //TODO: check if the marker already has an id
-      marker
-        .setLngLat([lng,lat])
-        .addTo(map.current)
-        .setDraggable(true);
-      markers.current[marker.id] = marker;
-    })
-  }, [])
+    map.current?.on('click',addMarker)
+  }, [addMarker])
 
   return {
     coords,
     setRef,
-    markers
+    markers,
+    addMarker
   }
 }
 
