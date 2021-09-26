@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {v4 as uuid} from 'uuid'
+import { Subject } from 'rxjs'
 import mapboxgl from 'mapbox-gl';
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_KEY;
 
@@ -16,6 +17,10 @@ const useMapbox = (initalPosition) => {
   //markers reference
   const markers = useRef({})
 
+  //Rxjs observables
+  const markerMovement = useRef(new Subject())
+  const newMarker = useRef(new Subject())
+
   const addMarker = useCallback((e) => {
     const { lng, lat } = e.lngLat 
     const marker = new mapboxgl.Marker()
@@ -25,6 +30,15 @@ const useMapbox = (initalPosition) => {
       .addTo(map.current)
       .setDraggable(true);
     markers.current[marker.id] = marker;
+    //emit event of new marker
+    newMarker.current.next({id: marker.id, lng, lat});
+
+    marker.on('drag', ({target}) => {
+      const {id} = target
+      const {lng, lat} = target.getLngLat()
+      //emit marker position change
+      markerMovement.current.next({id, lng, lat})
+    })
   }, [])
 
   //create the map instance on first load of the hook
@@ -60,7 +74,9 @@ const useMapbox = (initalPosition) => {
     coords,
     setRef,
     markers,
-    addMarker
+    addMarker,
+    newMarker$: newMarker.current,
+    markerMovement$: markerMovement.current
   }
 }
 

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import useMapbox from '../hooks/useMapbox';
 
 const initalPosition = {
@@ -7,7 +8,24 @@ const initalPosition = {
 }
 
 const MapPage = () => {
-  const { coords, setRef } = useMapbox(initalPosition) 
+  const { coords, setRef, newMarker$, markerMovement$ } = useMapbox(initalPosition)
+  
+  useEffect(() => {
+    newMarker$.subscribe(marker => {
+      console.log(marker);
+      //TODO: emit new marker socket event
+    })
+    return () => newMarker$.unsubscribe()
+  }, [newMarker$])
+  
+  useEffect(() => {
+    markerMovement$.subscribe(marker => {
+      console.log(marker);
+      //TODO: emit marker position change socket event
+    })
+    return () => markerMovement$.unsubscribe()
+  }, [markerMovement$])
+
   return (
     <>
       <div className="info">
