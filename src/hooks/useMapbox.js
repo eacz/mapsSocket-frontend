@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import {v4 as uuid} from 'uuid'
 import mapboxgl from 'mapbox-gl';
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_KEY;
 
@@ -9,10 +10,13 @@ const useMapbox = (initalPosition) => {
   const setRef = useCallback(node => {
     mapRef.current = node
   }, [])
-  
   //map is an instance of mapboxgl 
   const map = useRef()
   const [coords, setCoords] = useState(initalPosition)
+  //markers reference
+  const markers = useRef({})
+
+
 
   //create the map instance on first load of the hook
   useEffect(() => {
@@ -38,9 +42,24 @@ const useMapbox = (initalPosition) => {
     return map.current?.off('move')
   }, [])
 
+  //add markers on click
+  useEffect(() => {
+    map.current?.on('click',(e) => {
+      const { lng, lat } = e.lngLat 
+      const marker = new mapboxgl.Marker()
+      marker.id = uuid() //TODO: check if the marker already has an id
+      marker
+        .setLngLat([lng,lat])
+        .addTo(map.current)
+        .setDraggable(true);
+      markers.current[marker.id] = marker;
+    })
+  }, [])
+
   return {
     coords,
-    setRef
+    setRef,
+    markers
   }
 }
 
