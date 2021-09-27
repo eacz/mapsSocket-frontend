@@ -1,10 +1,19 @@
+import SocketProvider from "./context/SocketContext"
 import MapPage from "./pages/MapPage"
 
 const App = () => {
   return (
-    <div>
+    <AppState>
       <MapPage />
-    </div>
+    </AppState>
+  )
+}
+
+const AppState = ({children}) => {
+  return (
+    <SocketProvider>
+      {children}
+    </SocketProvider>
   )
 }
 
