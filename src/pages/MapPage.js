@@ -31,9 +31,9 @@ const MapPage = () => {
   // listening on new-marker event
   useEffect(() => {
     socket.on('new-marker', marker => {
-      console.log(marker);
+      addMarker(marker)
     })
-  }, [socket])
+  }, [socket, addMarker])
 
   //listen active markers event
   useEffect(() => {
