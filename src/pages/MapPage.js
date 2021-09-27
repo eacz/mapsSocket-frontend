@@ -9,7 +9,7 @@ const initalPosition = {
 }
 
 const MapPage = () => {
-  const { coords, setRef, newMarker$, markerMovement$ } = useMapbox(initalPosition)
+  const { coords, setRef, addMarker, newMarker$, markerMovement$ } = useMapbox(initalPosition)
   const { socket } = useContext(SocketContext)
   
   //TODO BIG: move all this on a custom hooks
@@ -34,6 +34,15 @@ const MapPage = () => {
       console.log(marker);
     })
   }, [socket])
+
+  //listen active markers event
+  useEffect(() => {
+    socket.on('active-markers', markers => {
+      for(const key of Object.keys(markers)){
+        addMarker(markers[key], key)
+      }
+    })
+  }, [socket, addMarker])
 
   return (
     <>

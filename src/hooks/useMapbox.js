@@ -21,17 +21,20 @@ const useMapbox = (initalPosition) => {
   const markerMovement = useRef(new Subject())
   const newMarker = useRef(new Subject())
 
-  const addMarker = useCallback((e) => {
-    const { lng, lat } = e.lngLat 
+  const addMarker = useCallback((e, id) => {
+    const { lng, lat } = e.lngLat || e
     const marker = new mapboxgl.Marker()
-    marker.id = uuid() //TODO: check if the marker already has an id
+    marker.id = id ?? uuid() 
     marker
       .setLngLat([lng,lat])
       .addTo(map.current)
       .setDraggable(true);
     markers.current[marker.id] = marker;
+    
     //emit event of new marker
-    newMarker.current.next({id: marker.id, lng, lat});
+    if(!id){
+      newMarker.current.next({id: marker.id, lng, lat});
+    }
 
     marker.on('drag', ({target}) => {
       const {id} = target
