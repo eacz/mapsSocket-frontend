@@ -73,11 +73,16 @@ const useMapbox = (initalPosition) => {
     map.current?.on('click',addMarker)
   }, [addMarker])
 
+  const updateMarkersPosition = useCallback(({id, lng, lat}) => {
+    markers.current[id]?.setLngLat([lng,lat]) 
+  }, [])
+
   return {
     coords,
     setRef,
     markers,
     addMarker,
+    updateMarkersPosition,
     newMarker$: newMarker.current,
     markerMovement$: markerMovement.current
   }

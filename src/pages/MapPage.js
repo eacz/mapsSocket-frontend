@@ -9,7 +9,7 @@ const initalPosition = {
 }
 
 const MapPage = () => {
-  const { coords, setRef, addMarker, newMarker$, markerMovement$ } = useMapbox(initalPosition)
+  const { coords, setRef, addMarker, newMarker$, markerMovement$, updateMarkersPosition } = useMapbox(initalPosition)
   const { socket } = useContext(SocketContext)
   
   //TODO BIG: move all this on a custom hooks
@@ -17,21 +17,27 @@ const MapPage = () => {
     newMarker$.subscribe(marker => {
       socket.emit('new-marker', marker)
     })
-    return () => newMarker$.unsubscribe()
   }, [newMarker$, socket])
   
+  //when a marker is moved
   useEffect(() => {
     markerMovement$.subscribe(marker => {
-      console.log(marker);
-      //TODO: emit marker position change socket event
+      //emit marker position change socket event
+      socket.emit('updated-marker', marker)
     })
-    return () => markerMovement$.unsubscribe()
-  }, [markerMovement$])
+  }, [markerMovement$, socket])
+
+  //listen when a marker is moved
+  useEffect(() => {
+    socket.on('updated-marker', marker => {
+      updateMarkersPosition(marker)
+    })
+  }, [socket, updateMarkersPosition])
 
   // listening on new-marker event
   useEffect(() => {
     socket.on('new-marker', marker => {
-      addMarker(marker)
+      addMarker(marker, marker.id)
     })
   }, [socket, addMarker])
 
